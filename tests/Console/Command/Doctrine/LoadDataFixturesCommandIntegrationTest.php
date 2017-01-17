@@ -159,12 +159,48 @@ class LoadDataFixturesCommandIntegrationTest extends \PHPUnit_Framework_TestCase
         $this->assertFixturesDisplayEquals($expected, $commandTester->getDisplay());
     }
 
+    /**
+     * @dataProvider loadCommandProvider
+     */
+    public function testFixturesUsingAppend(array $inputs, string $expected)
+    {
+        $command = $this->application->find('hautelook:fixtures:load');
+        $commandTester = new CommandTester($command);
+        $commandTester->execute(
+            array_merge(
+                [
+                    'command' => 'hautelook:fixtures:load',
+                    '--append' => 'null',
+                ],
+                $inputs
+            ),
+            ['interactive' => false]
+        );
+
+        $this->assertFixturesDisplayEquals($expected, $commandTester->getDisplay());
+    }
+
     public function loadCommandProvider()
     {
         $data = [];
 
         $data[] = [
             [],
+            <<<'EOF'
+              > fixtures found:
+      - /home/travis/build/theofidry/AliceBundle/tests/Functional/TestBundle/Resources/fixtures/brand.yml
+      - /home/travis/build/theofidry/AliceBundle/tests/Functional/TestBundle/Resources/fixtures/product.yml
+      - /home/travis/build/theofidry/AliceBundle/tests/Functional/TestBundle/Bundle/ABundle/Resources/fixtures/aentity.php
+      - /home/travis/build/theofidry/AliceBundle/tests/Functional/TestBundle/Bundle/BBundle/Resources/fixtures/bentity.yml
+  > purging database
+  > fixtures loaded
+EOF
+        ];
+
+        $data[] = [
+            [
+                '--append' => null,
+            ],
             <<<'EOF'
               > fixtures found:
       - /home/travis/build/theofidry/AliceBundle/tests/Functional/TestBundle/Resources/fixtures/brand.yml
